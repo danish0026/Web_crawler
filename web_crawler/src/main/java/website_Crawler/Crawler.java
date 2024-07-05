@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-
-
 public class Crawler {
 
     public static void main(String[] args) {
@@ -29,7 +27,7 @@ public class Crawler {
             String titleXPath = scanner.nextLine();
             System.out.print("Price XPath: ");
             String priceXPath = scanner.nextLine();
-            System.out.print("Next Page XPath: ");
+            System.out.print("Next Page XPath (leave empty if not applicable): ");
             String nextPageXPath = scanner.nextLine();
 
             // Crawl and scrape the website
@@ -40,7 +38,11 @@ public class Crawler {
                 Document doc = Jsoup.connect(currentPageUrl).get();
                 saveSourceCode(doc.html(), "website_source.html");
                 products.addAll(crawlAndScrape(doc, titleXPath, priceXPath));
-                currentPageUrl = getNextPageUrl(doc, nextPageXPath);
+                if (!nextPageXPath.isEmpty()) {
+                    currentPageUrl = getNextPageUrl(doc, nextPageXPath);
+                } else {
+                    currentPageUrl = null;
+                }
             }
 
             // Print scraped products
@@ -86,6 +88,9 @@ public class Crawler {
     }
 
     public static String selectText(Element element, String xpath) {
+        if (xpath.isEmpty()) {
+            return "";
+        }
         Elements elements = element.select(xpathToCss(xpath));
         return elements.isEmpty() ? "" : elements.first().text();
     }
@@ -101,6 +106,9 @@ public class Crawler {
     }
 
     public static String getNextPageUrl(Document doc, String nextPageXPath) {
+        if (nextPageXPath.isEmpty()) {
+            return null;
+        }
         Elements nextPageElements = doc.select(xpathToCss(nextPageXPath));
         if (!nextPageElements.isEmpty()) {
             String nextPageUrl = nextPageElements.first().absUrl("href");
@@ -120,5 +128,3 @@ public class Crawler {
         }
     }
 }
-
-
